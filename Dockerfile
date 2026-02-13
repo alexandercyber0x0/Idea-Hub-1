@@ -55,7 +55,7 @@ ENV PORT=3000
 ENV HOSTNAME="0.0.0.0"
 
 # Create startup script that runs migrations then starts server
-RUN echo '#!/bin/sh\nbunx prisma db push --skip-generate\nexec bun server.js' > /app/start.sh
+RUN echo '#!/bin/sh\nbunx prisma db push\nexec bun server.js' > /app/start.sh
 RUN chmod +x /app/start.sh
 
 # Start the application
