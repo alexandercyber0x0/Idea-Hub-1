@@ -40,9 +40,6 @@ ENV NEXT_TELEMETRY_DISABLED=1
 # Create data directory for SQLite and security config
 RUN mkdir -p /app/data /app/db
 
-# Set up a volume for persistent data
-VOLUME ["/app/data", "/app/db"]
-
 # Copy built application
 COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static
