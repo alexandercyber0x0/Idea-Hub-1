@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
-import { verifyPassword, verifyStoredPassword } from '@/lib/encryption';
-import { isPasswordSet, setupPassword } from '@/lib/passwordManager';
+import { verifyPassword } from '@/lib/encryption';
+import { isPasswordSet, setupPassword, verifyStoredPassword } from '@/lib/passwordManager';
 
 // POST - Import data from encrypted backup
 export async function POST(request: NextRequest) {
