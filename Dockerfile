@@ -9,6 +9,9 @@ RUN apk add --no-cache openssl
 COPY package.json ./
 COPY bun.lock* ./package-lock.json* ./
 
+# Copy prisma schema before npm install (needed for postinstall prisma generate)
+COPY prisma ./prisma/
+
 # Install dependencies
 RUN npm install
 
