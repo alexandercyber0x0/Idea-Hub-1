@@ -1,8 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getZai } from '@/lib/zai';
-
-// Maximum duration per chunk (30 seconds limit for ASR)
-const MAX_CHUNK_DURATION = 30;
+import { transcribeAudio } from '@/lib/groq';
 
 export async function POST(request: NextRequest) {
   try {
@@ -13,7 +10,6 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Audio chunks are required' }, { status: 400 });
     }
 
-    const zai = await getZai();
     const transcriptions: string[] = [];
     
     // Process each audio chunk
@@ -21,12 +17,10 @@ export async function POST(request: NextRequest) {
       const chunk = audioChunks[i];
       
       try {
-        const response = await zai.audio.asr.create({
-          file_base64: chunk,
-        });
+        const text = await transcribeAudio(chunk);
         
-        if (response.text && response.text.trim()) {
-          transcriptions.push(response.text.trim());
+        if (text && text.trim()) {
+          transcriptions.push(text.trim());
         }
       } catch (chunkError) {
         console.error(`Error transcribing chunk ${i + 1}:`, chunkError);

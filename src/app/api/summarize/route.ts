@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getZai } from '@/lib/zai';
+import { createChatCompletion } from '@/lib/groq';
 
 export async function POST(request: NextRequest) {
   try {
@@ -10,30 +10,23 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Transcript is required' }, { status: 400 });
     }
 
-    const zai = await getZai();
-
-    const completion = await zai.chat.completions.create({
-      messages: [
-        {
-          role: 'assistant',
-          content: `You are an expert at summarizing voice notes and ideas. 
-          Create a clear, concise summary that:
-          1. Captures the main points and key ideas
-          2. Identifies any action items or next steps
-          3. Organizes the information in a readable format
-          4. Keeps the summary brief but comprehensive
-          
-          Format your response with clear sections using markdown.`
-        },
-        {
-          role: 'user',
-          content: `${title ? `Title: ${title}\n\n` : ''}Transcript:\n${transcript}\n\nPlease summarize this voice note.`
-        }
-      ],
-      thinking: { type: 'disabled' }
-    });
-
-    const summary = completion.choices[0]?.message?.content;
+    const summary = await createChatCompletion([
+      {
+        role: 'system',
+        content: `You are an expert at summarizing voice notes and ideas. 
+        Create a clear, concise summary that:
+        1. Captures the main points and key ideas
+        2. Identifies any action items or next steps
+        3. Organizes the information in a readable format
+        4. Keeps the summary brief but comprehensive
+        
+        Format your response with clear sections using markdown.`
+      },
+      {
+        role: 'user',
+        content: `${title ? `Title: ${title}\n\n` : ''}Transcript:\n${transcript}\n\nPlease summarize this voice note.`
+      }
+    ]);
 
     if (!summary) {
       return NextResponse.json({ error: 'Failed to generate summary' }, { status: 500 });

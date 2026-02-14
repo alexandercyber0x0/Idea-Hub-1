@@ -2,7 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { decryptObject, encryptObject } from '@/lib/encryption';
 import { isPasswordSet, verifyStoredPassword } from '@/lib/passwordManager';
-import { getZai } from '@/lib/zai';
+import { webSearch } from '@/lib/tavily';
+import { createChatCompletion } from '@/lib/groq';
 
 // GET all AI tools
 export async function GET(request: NextRequest) {
@@ -40,7 +41,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Tool name is required' }, { status: 400 });
     }
 
-    // Search the web for AI tool information (only if z-ai-web-dev-sdk is available)
+    // Search the web for AI tool information
     let toolInfo = {
       description: null as string | null,
       website: null as string | null,
@@ -52,48 +53,39 @@ export async function POST(request: NextRequest) {
     };
 
     try {
-      const zai = await getZai();
-      
       const searchQuery = `${name} AI tool pricing features use cases official website`;
-      const searchResults = await zai.functions.invoke('web_search', {
-        query: searchQuery,
-        num: 10,
-      });
+      const searchResults = await webSearch(searchQuery, 10);
 
       const searchContext = searchResults
         .slice(0, 5)
-        .map((r: { name: string; snippet: string; url: string }, i: number) => 
+        .map((r, i) => 
           `${i + 1}. ${r.name}\n${r.snippet}\nURL: ${r.url}`
         )
         .join('\n\n');
 
-      const completion = await zai.chat.completions.create({
-        messages: [
+      const completionText = await createChatCompletion([
+        {
+          role: 'system',
+          content: `You are an AI tool researcher. Extract information about AI tools from search results. 
+          Return ONLY valid JSON with this structure (no markdown, no code blocks):
           {
-            role: 'assistant',
-            content: `You are an AI tool researcher. Extract information about AI tools from search results. 
-            Return ONLY valid JSON with this structure (no markdown, no code blocks):
-            {
-              "description": "Brief description of the tool",
-              "website": "Official website URL",
-              "pricing": "Pricing model (free/freemium/paid/subscription with prices)",
-              "useCases": ["use case 1", "use case 2"],
-              "features": ["feature 1", "feature 2"],
-              "category": "Category (e.g., Image Generation, Text AI, Video, Audio, etc.)",
-              "logoUrl": "Logo URL if found or null"
-            }
-            If information is not found, use null for that field.`
-          },
-          {
-            role: 'user',
-            content: `Tool Name: ${name}\n\nSearch Results:\n${searchContext}\n\nExtract the tool information.`
+            "description": "Brief description of the tool",
+            "website": "Official website URL",
+            "pricing": "Pricing model (free/freemium/paid/subscription with prices)",
+            "useCases": ["use case 1", "use case 2"],
+            "features": ["feature 1", "feature 2"],
+            "category": "Category (e.g., Image Generation, Text AI, Video, Audio, etc.)",
+            "logoUrl": "Logo URL if found or null"
           }
-        ],
-        thinking: { type: 'disabled' }
-      });
+          If information is not found, use null for that field.`
+        },
+        {
+          role: 'user',
+          content: `Tool Name: ${name}\n\nSearch Results:\n${searchContext}\n\nExtract the tool information.`
+        }
+      ]);
 
-      const responseText = completion.choices[0]?.message?.content || '{}';
-      const cleanedResponse = responseText.replace(/```json\n?|\n?```/g, '').trim();
+      const cleanedResponse = completionText.replace(/```json\n?|\n?```/g, '').trim();
       toolInfo = JSON.parse(cleanedResponse);
     } catch (searchError) {
       console.log('Web search failed, using defaults:', searchError);
