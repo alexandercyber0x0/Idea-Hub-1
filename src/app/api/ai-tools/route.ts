@@ -69,7 +69,7 @@ export async function POST(request: NextRequest) {
           content: `You are an AI tool researcher. Extract information about AI tools from search results. 
           Return ONLY valid JSON with this structure (no markdown, no code blocks):
           {
-            "description": "Brief description of the tool",
+            "description": "ONE concise sentence (max 15 words) describing what the tool does",
             "website": "Official website URL",
             "pricing": "Pricing model (free/freemium/paid/subscription with prices)",
             "useCases": ["use case 1", "use case 2"],
@@ -77,7 +77,7 @@ export async function POST(request: NextRequest) {
             "category": "Category (e.g., Image Generation, Text AI, Video, Audio, etc.)",
             "logoUrl": "Logo URL if found or null"
           }
-          If information is not found, use null for that field.`
+          IMPORTANT: Keep description to ONE short sentence max 15 words. If information is not found, use null for that field.`
         },
         {
           role: 'user',
