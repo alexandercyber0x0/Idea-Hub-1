@@ -40,14 +40,13 @@ export async function isPasswordSetup(): Promise<boolean> {
     const config = JSON.parse(fs.readFileSync(CONFIG_FILE, 'utf8'));
     if (!config.passwordHash) return false;
     
-    // If config exists but database is empty, treat as not setup
-    // (database was reset but config persisted)
-    const hasData = await databaseHasData();
-    if (!hasData) {
-      // Clear the stale config file
-      fs.unlinkSync(CONFIG_FILE);
-      return false;
-    }
+    // If config exists, password is setup (don't delete just because database is empty)
+// User might have set up password before adding any data
+const hasData = await databaseHasData();
+if (!hasData) {
+  // Database is empty but password is set - this is fine for new users
+  // Don't delete the config file
+}
     
     return true;
   } catch {
