@@ -55,3 +55,6 @@ server.log
 
 # Bun
 bun.lockb
+
+# Z.ai SDK config (contains API key)
+.z-ai-config
