@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { decryptObject, encryptObject } from '@/lib/encryption';
 import { isPasswordSet, verifyStoredPassword } from '@/lib/passwordManager';
+import { getZai } from '@/lib/zai';
 
 // GET all AI tools
 export async function GET(request: NextRequest) {
@@ -51,8 +52,7 @@ export async function POST(request: NextRequest) {
     };
 
     try {
-      const ZAI = (await import('z-ai-web-dev-sdk')).default;
-      const zai = await ZAI.create();
+      const zai = await getZai();
       
       const searchQuery = `${name} AI tool pricing features use cases official website`;
       const searchResults = await zai.functions.invoke('web_search', {

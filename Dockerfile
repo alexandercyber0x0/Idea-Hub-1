@@ -29,4 +29,4 @@ ENV NODE_ENV=production
 ENV PORT=8080
 
 # Start command
-CMD ["sh", "-c", "node scripts/generate-config.js && npx prisma db push --skip-generate && node .next/standalone/server.js"]
+CMD ["sh", "-c", "npx prisma db push --skip-generate && node .next/standalone/server.js"]

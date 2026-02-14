@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import ZAI from 'z-ai-web-dev-sdk';
+import { getZai } from '@/lib/zai';
 
 export async function POST(request: NextRequest) {
   try {
@@ -10,7 +10,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Transcript is required' }, { status: 400 });
     }
 
-    const zai = await ZAI.create();
+    const zai = await getZai();
 
     const completion = await zai.chat.completions.create({
       messages: [

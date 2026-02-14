@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import ZAI from 'z-ai-web-dev-sdk';
+import { getZai } from '@/lib/zai';
 
 // Maximum duration per chunk (30 seconds limit for ASR)
 const MAX_CHUNK_DURATION = 30;
@@ -13,7 +13,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Audio chunks are required' }, { status: 400 });
     }
 
-    const zai = await ZAI.create();
+    const zai = await getZai();
     const transcriptions: string[] = [];
     
     // Process each audio chunk
