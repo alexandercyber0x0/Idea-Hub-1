@@ -141,16 +141,16 @@ export default function IdeaHub() {
     }
   }, [isUnlocked, fetchData]);
 
-  // Handle password setup complete
   const handlePasswordSetup = (newPassword: string) => {
-    setPassword(newPassword);
-    setIsUnlocked(true);
-    sessionStorage.setItem('ideaHubPassword', newPassword);
-    toast({
-      title: 'Welcome!',
-      description: 'Your data is now encrypted and secure',
-    });
-  };
+  setPassword(newPassword);
+  setIsPasswordSetup(true);  // ← ADD THIS LINE
+  setIsUnlocked(true);
+  sessionStorage.setItem('ideaHubPassword', newPassword);
+  toast({
+    title: 'Welcome!',
+    description: 'Your data is now encrypted and secure',
+  });
+};
 
   // Handle unlock
   const handleUnlock = (unlockPassword: string) => {
