@@ -75,7 +75,6 @@ const statuses = [
   { value: 'bank', label: 'Idea Bank' },
   { value: 'doing', label: 'In Progress' },
   { value: 'done', label: 'Done' },
-  { value: 'archived', label: 'Archived' },
 ];
 
 // Chunk duration in seconds (under 30s ASR limit)
@@ -387,7 +386,7 @@ function IdeaModalInner({ onClose, onSave, idea }: Omit<IdeaModalProps, 'isOpen'
       category,
       status,
       priority,
-      reelLinks,
+      reelLinks: JSON.stringify(reelLinks),
       transcript: transcript || null,
       summary: summary || null,
     });

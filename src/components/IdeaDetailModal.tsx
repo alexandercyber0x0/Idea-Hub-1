@@ -1,7 +1,8 @@
 'use client';
 
+import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { X, MessageSquare, FileText, Link as LinkIcon, ExternalLink, Instagram } from 'lucide-react';
+import { X, MessageSquare, FileText, Link as LinkIcon, ExternalLink, Instagram, Archive, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Idea } from './IdeaModal';
@@ -11,9 +12,13 @@ interface IdeaDetailModalProps {
   onClose: () => void;
   idea: Idea | null;
   onEdit: () => void;
+  onArchive: (id: string) => void;
+  onDelete: (id: string) => void;
 }
 
-export default function IdeaDetailModal({ isOpen, onClose, idea, onEdit }: IdeaDetailModalProps) {
+export default function IdeaDetailModal({ isOpen, onClose, idea, onEdit, onArchive, onDelete }: IdeaDetailModalProps) {
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+
   if (!isOpen || !idea) return null;
 
   const parseReelLinks = (): string[] => {
@@ -25,6 +30,25 @@ export default function IdeaDetailModal({ isOpen, onClose, idea, onEdit }: IdeaD
   };
 
   const reelLinks = parseReelLinks();
+  const isArchived = idea.status === 'archived';
+
+  const handleArchive = () => {
+    onArchive(idea.id);
+    onClose();
+  };
+
+  const handleDeleteClick = () => {
+    setShowDeleteConfirm(true);
+  };
+
+  const handleConfirmDelete = () => {
+    onDelete(idea.id);
+    onClose();
+  };
+
+  const handleCancelDelete = () => {
+    setShowDeleteConfirm(false);
+  };
 
   return (
     <motion.div
@@ -145,12 +169,57 @@ export default function IdeaDetailModal({ isOpen, onClose, idea, onEdit }: IdeaD
           <p className="text-xs text-gray-500">
             Created {new Date(idea.createdAt).toLocaleDateString()}
           </p>
-          <Button 
-            onClick={onEdit}
-            className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
-          >
-            Edit Idea
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button 
+              onClick={onEdit}
+              variant="outline"
+              className="border-gray-600 text-gray-300 hover:bg-gray-800"
+            >
+              Edit Idea
+            </Button>
+          </div>
+        </div>
+
+        {/* Action Buttons */}
+        <div className="flex gap-3 mt-4 pt-4 border-t border-gray-700">
+          {!isArchived && (
+            <Button 
+              onClick={handleArchive}
+              variant="outline"
+              className="flex-1 border-yellow-600/50 text-yellow-400 hover:bg-yellow-950/30"
+            >
+              <Archive className="w-4 h-4 mr-2" />
+              Archive
+            </Button>
+          )}
+          
+          {!showDeleteConfirm ? (
+            <Button 
+              onClick={handleDeleteClick}
+              variant="outline"
+              className="flex-1 border-red-600/50 text-red-400 hover:bg-red-950/30"
+            >
+              <Trash2 className="w-4 h-4 mr-2" />
+              Delete
+            </Button>
+          ) : (
+            <div className="flex-1 flex gap-2">
+              <Button 
+                onClick={handleCancelDelete}
+                variant="outline"
+                className="flex-1 border-gray-600 text-gray-300 hover:bg-gray-800"
+              >
+                Cancel
+              </Button>
+              <Button 
+                onClick={handleConfirmDelete}
+                variant="destructive"
+                className="flex-1 bg-red-600 hover:bg-red-700"
+              >
+                Confirm Delete
+              </Button>
+            </div>
+          )}
         </div>
       </motion.div>
     </motion.div>

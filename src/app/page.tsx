@@ -327,6 +327,46 @@ export default function IdeaHub() {
     setIsIdeaModalOpen(true);
   };
 
+  // Archive idea handler
+  const handleArchiveIdea = async (id: string) => {
+    try {
+      const idea = ideas.find(i => i.id === id);
+      if (!idea) return;
+      
+      await apiCall(`/api/ideas/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ...idea, status: 'archived' }),
+      });
+      
+      setIdeas(ideas.map(i => i.id === id ? { ...i, status: 'archived' } : i));
+      toast({ title: 'Success', description: 'Idea archived' });
+    } catch (error) {
+      console.error('Failed to archive idea:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to archive idea',
+        variant: 'destructive',
+      });
+    }
+  };
+
+  // Delete idea handler
+  const handleDeleteIdea = async (id: string) => {
+    try {
+      await apiCall(`/api/ideas/${id}`, { method: 'DELETE' });
+      setIdeas(ideas.filter(i => i.id !== id));
+      toast({ title: 'Success', description: 'Idea deleted' });
+    } catch (error) {
+      console.error('Failed to delete idea:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to delete idea',
+        variant: 'destructive',
+      });
+    }
+  };
+
   // Column component
   const Column = ({ title, status, ideas: columnIdeas, icon: Icon, color }: {
     title: string;
@@ -467,7 +507,7 @@ export default function IdeaHub() {
               <Lightbulb className="w-4 h-4 mr-2" />
               Ideas
               <Badge variant="outline" className="ml-2 border-purple-500/30 text-purple-400">
-                {ideas.length}
+                {bankIdeas.length + doingIdeas.length + doneIdeas.length}
               </Badge>
             </TabsTrigger>
             <TabsTrigger value="ai-tools" className="data-[state=active]:bg-pink-600 data-[state=active]:text-white text-gray-400">
@@ -628,6 +668,8 @@ export default function IdeaHub() {
         }}
         idea={activeIdea}
         onEdit={() => activeIdea && handleEditIdea(activeIdea)}
+        onArchive={handleArchiveIdea}
+        onDelete={handleDeleteIdea}
       />
 
       <AIToolModal
