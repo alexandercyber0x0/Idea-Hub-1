@@ -31,10 +31,24 @@ export default function IdeaDetailModal({ isOpen, onClose, idea, onEdit, onArchi
 
   const parseSubtasks = (): { id: string; title: string; completed: boolean }[] => {
     try {
+      // Return empty array if no subtasks
       if (!idea.subtasks) return [];
-      // Handle if it's already an array or a JSON string
-      if (Array.isArray(idea.subtasks)) return idea.subtasks;
-      return JSON.parse(idea.subtasks as unknown as string);
+      
+      // Handle if it's already an array
+      if (Array.isArray(idea.subtasks)) {
+        // Validate each subtask has required properties
+        return idea.subtasks.filter((s): s is { id: string; title: string; completed: boolean } => 
+          s && typeof s === 'object' && 'id' in s && 'title' in s
+        );
+      }
+      
+      // Handle if it's a JSON string
+      if (typeof idea.subtasks === 'string') {
+        const parsed = JSON.parse(idea.subtasks);
+        return Array.isArray(parsed) ? parsed : [];
+      }
+      
+      return [];
     } catch {
       return [];
     }
