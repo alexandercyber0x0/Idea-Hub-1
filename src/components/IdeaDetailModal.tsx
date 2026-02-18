@@ -29,7 +29,19 @@ export default function IdeaDetailModal({ isOpen, onClose, idea, onEdit, onArchi
     }
   };
 
+  const parseSubtasks = (): { id: string; title: string; completed: boolean }[] => {
+    try {
+      if (!idea.subtasks) return [];
+      // Handle if it's already an array or a JSON string
+      if (Array.isArray(idea.subtasks)) return idea.subtasks;
+      return JSON.parse(idea.subtasks as unknown as string);
+    } catch {
+      return [];
+    }
+  };
+
   const reelLinks = parseReelLinks();
+  const subtasks = parseSubtasks();
   const isArchived = idea.status === 'archived';
 
   const handleArchive = () => {
@@ -146,11 +158,11 @@ export default function IdeaDetailModal({ isOpen, onClose, idea, onEdit, onArchi
         )}
 
         {/* Subtasks */}
-        {idea.subtasks && idea.subtasks.length > 0 && (
+        {subtasks.length > 0 && (
           <div className="mb-6">
             <h3 className="text-sm font-medium text-gray-400 mb-3">Subtasks</h3>
             <div className="space-y-2">
-              {idea.subtasks.map((subtask) => (
+              {subtasks.map((subtask) => (
                 <div 
                   key={subtask.id}
                   className={`p-3 rounded-lg ${subtask.completed ? 'bg-green-950/30 border border-green-500/20' : 'bg-gray-800 border border-gray-700'}`}
